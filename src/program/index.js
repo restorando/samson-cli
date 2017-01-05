@@ -18,9 +18,7 @@ const showDeploys = deploys => {
   console.table(deploys.map(deploy => ({
     'When': moment(deploy.updated_at).from(),
     'Who': `${deploy.summary} by ${chalk.bold(deploy.user.name)}`,
-    'Status': deploy.status === 'succeeded'
-      ? chalk.green(deploy.status)
-      : chalk.red(chalk.bold(deploy.status))
+    'Status': formatStatus(deploy.status)
   })))
 }
 
@@ -35,9 +33,7 @@ const showBuilds = builds => {
     'Label': build.label,
     'Created': moment(build.created_at).from(),
     'Git ref': build.git_ref === build.git_sha ? build.git_ref : `${build.git_ref} (${build.git_sha})`,
-    'Status': build.docker_status === 'succeeded'
-      ? chalk.green(build.docker_status)
-      : chalk.red(chalk.bold(build.docker_status))
+    'Status': formatStatus(build.docker_status)
   })))
 }
 
@@ -79,6 +75,11 @@ program
   .catch(fail)
 })
 
+const isFinished = status => status === 'errored'
+const formatStatus = status => status === 'succeeded'
+  ? chalk.green(status)
+  : chalk.red(chalk.bold(status))
+
 program
 .command('deploy [stage] [reference]')
 .action((stage, reference, options) => {
@@ -90,7 +91,25 @@ program
     params.projectId,
     stage || config.defaults.stage,
     params.token,
-    reference || config.defaults.reference))
+    reference || config.defaults.reference).then(deploy => ({
+      deploy,
+      projectId: params.projectId
+    })))
+  .then(params => {
+    console.log(`Deploy started with ID ${chalk.bold(params.deploy.id)}`)
+    var id = setInterval(() => {
+      api
+      .getDeploys(params.projectId)
+      .then(deploys => {
+        const deploy = deploys.find(d => d.id === params.deploy.id)
+        console.log(`Status: ${formatStatus(deploy.status)}`)
+        console.log(deploy.summary)
+        if (isFinished(deploy.status)) {
+          clearInterval(id)
+        }
+      })
+    }, 1000)
+  })
   .catch(fail)
 })
 
