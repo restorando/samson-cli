@@ -5,7 +5,7 @@ require('console.table')
 const moment = require('moment')
 // TODO: This will be relative to the client's project folder
 const config = require('../../samsonrc.json')
-const api = require('../api')(config.url, config.auth)
+const api = require('../api')(config.url, config.auth, !config.samson.production)
 
 const getProjectId = projectName => api
   .getProjects()

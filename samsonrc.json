@@ -5,5 +5,8 @@
   "defaults": {
     "reference": "master",
     "stage": "staging"
+  },
+  "samson": {
+    "production": false
   }
 }

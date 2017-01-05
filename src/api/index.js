@@ -3,14 +3,14 @@ const cheerio = require('cheerio')
 
 var projects, stages
 
-module.exports = (url, auth) => {
+module.exports = (url, auth, staging) => {
+  const cookie = `_samson_session_${staging ? 'staging' : 'production'}=${auth}`
   const samsonAPI = axios
     .create({
       baseURL: url,
       headers: {
         'Accept': 'application/json',
-        // TODO: Refactor. Also, in production the cookie name is _samson_session_production
-        'Cookie': `_samson_session_staging=${auth}`
+        'Cookie': cookie
       }
     })
 
@@ -54,7 +54,7 @@ module.exports = (url, auth) => {
     getAuthenticityToken: (project, stage) => axios
       .get(`${url}/projects/${project}/stages/${stage}/deploys/new`, {
         headers: {
-          'Cookie': `_samson_session_staging=${auth}`
+          'Cookie': cookie
         }
       })
       .then(response => {
