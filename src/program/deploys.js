@@ -39,12 +39,19 @@ const Spinners = (tasks) => {
       current = spinners.shift()
       current && current.start()
     },
-    fail: () => {
+    fail: error => {
+      if (error) {
+        current.text = error
+      }
       current.fail()
     },
-    succeed: () => {
+    succeed: text => {
+      if (text) {
+        current.text = text
+      }
       current.succeed()
-    }
+    },
+    text: () => current.text
   }
 }
 
@@ -52,7 +59,7 @@ module.exports.deploy = api => (stage, reference, options) => {
   const spinners = Spinners([
     'Fetching project metadata...',
     'Authenticating...',
-    'Deploying...'
+    'Deploying (this can take some minutes)...'
   ])
 
   spinners.start()
@@ -86,12 +93,15 @@ module.exports.deploy = api => (stage, reference, options) => {
         if (h.isFinished(deploy.status)) {
           clearInterval(id)
           if (h.isFailed(deploy.status)) {
-            spinners.fail()
-            console.error(`Status: ${h.formatStatus(deploy.status)}`)
+            spinners.fail(`Deploy failed: ${deploy.summary}`)
           } else {
-            spinners.succeed()
+            spinners.succeed(`Deploy succeeded: ${deploy.summary}`)
           }
         }
+      })
+      .catch(error => {
+        spinners.fail(error)
+        h.fail(error)
       })
     }, 1000)
   })
