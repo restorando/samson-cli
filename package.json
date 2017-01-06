@@ -11,9 +11,14 @@
     "lint": "standard",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "keywords": [],
   "author": "José Fresco <josemariafresco@gmail.com>",
   "license": "MIT",
+  "repository": "https://github.com/restorando/samson-cli.git",
+  "bugs": "https://github.com/restorando/samson-cli/issues",
   "dependencies": {
     "axios": "^0.15.3",
     "chalk": "^1.1.3",
