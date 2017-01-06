@@ -1,9 +1,13 @@
 {
   "name": "samson-cli",
-  "version": "0.1.0",
+  "version": "0.1.24",
   "description": "Samson command line interface",
   "main": "index.js",
+  "bin": {
+    "samson": "./index.js"
+  },
   "scripts": {
+    "install": "tabtab install --auto --name samson",
     "lint": "standard",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,8 +20,10 @@
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
     "console.table": "^0.8.0",
+    "gitty": "^3.5.0",
     "moment": "^2.17.1",
-    "ora": "^0.4.0"
+    "ora": "^0.4.0",
+    "tabtab": "^2.2.2"
   },
   "devDependencies": {
     "standard": "^8.6.0"

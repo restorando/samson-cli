@@ -1,5 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
+const gitty = require('gitty')
 
 var projects, stages
 
@@ -13,8 +14,18 @@ module.exports = (url, auth, staging) => {
         'Cookie': cookie
       }
     })
+  const git = gitty('.')
 
   return {
+    getBranches: () => new Promise((resolve, reject) => {
+      git.getBranches((error, branches) => {
+        if (error) {
+          return reject(error)
+        }
+        resolve(branches.others.concat(branches.current))
+      })
+    }),
+
     getProjects: () => new Promise((resolve, reject) => {
       if (!projects) {
         samsonAPI
