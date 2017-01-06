@@ -2,6 +2,8 @@ const chalk = require('chalk')
 
 module.exports.isFinished = status => status === 'errored'
 
+module.exports.isFailed = status => status === 'errored' || status === 'failed'
+
 module.exports.formatStatus = status => status === 'succeeded'
   ? chalk.green(status)
   : chalk.red(chalk.bold(status))

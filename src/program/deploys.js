@@ -2,6 +2,7 @@ const moment = require('moment')
 const chalk = require('chalk')
 const config = require('../config')
 const h = require('./helpers')
+const ora = require('ora')
 
 const showDeploys = deploys => {
   console.table(deploys.map(deploy => ({
@@ -19,12 +20,52 @@ module.exports.show = api => () => {
   .catch(h.fail)
 }
 
+const Spinners = (tasks) => {
+  var spinners, current
+
+  return {
+    start: () => {
+      spinners = tasks.map(t => ora(t))
+      current = spinners.shift()
+      current.start()
+    },
+    succeedAndNext: () => {
+      current.succeed()
+      current = spinners.shift()
+      current && current.start()
+    },
+    failAndNext: () => {
+      current.fail()
+      current = spinners.shift()
+      current && current.start()
+    },
+    fail: () => {
+      current.fail()
+    },
+    succeed: () => {
+      current.succeed()
+    }
+  }
+}
+
 module.exports.deploy = api => (stage, reference, options) => {
+  const spinners = Spinners([
+    'Fetching project metadata...',
+    'Authenticating...',
+    'Deploying...'
+  ])
+
+  spinners.start()
+
   api.getProjects()
   .then(h.getProjectId(config.project))
   .then(projectId => api
     .getAuthenticityToken(projectId, 'staging')
-    .then(token => ({ projectId, token })))
+    .then(token => {
+      spinners.succeedAndNext()
+      return { projectId, token }
+    }))
+    .catch(() => spinners.fail())
   .then(params => api
     .deploy(
       params.projectId,
@@ -36,19 +77,26 @@ module.exports.deploy = api => (stage, reference, options) => {
       projectId: params.projectId
     })))
   .then(params => {
-    console.log(`Deploy started with ID ${chalk.bold(params.deploy.id)}`)
+    spinners.succeedAndNext()
     var id = setInterval(() => {
       api
       .getDeploys(params.projectId)
       .then(deploys => {
         const deploy = deploys.find(d => d.id === params.deploy.id)
-        console.log(`Status: ${h.formatStatus(deploy.status)}`)
-        console.log(deploy.summary)
         if (h.isFinished(deploy.status)) {
           clearInterval(id)
+          if (h.isFailed(deploy.status)) {
+            spinners.fail()
+            console.error(`Status: ${h.formatStatus(deploy.status)}`)
+          } else {
+            spinners.succeed()
+          }
         }
       })
     }, 1000)
   })
-  .catch(h.fail)
+  .catch(err => {
+    spinners.fail()
+    h.fail(err)
+  })
 }

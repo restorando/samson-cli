@@ -16,7 +16,8 @@
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
     "console.table": "^0.8.0",
-    "moment": "^2.17.1"
+    "moment": "^2.17.1",
+    "ora": "^0.4.0"
   },
   "devDependencies": {
     "standard": "^8.6.0"
