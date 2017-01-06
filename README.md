@@ -1,6 +1,8 @@
 # Samson CLI
 Command line utility to manage deploys in Zendesk's Samson
 
+<img src="assets/screenshot.gif" />
+
 ## Requirements
 `git` and Node.js >=4 with `npm`.
 
