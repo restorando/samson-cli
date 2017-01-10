@@ -1,6 +1,8 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
 const gitty = require('gitty')
+const EventSource = require('eventsource')
+const URL = require('url')
 
 var projects, stages
 
@@ -81,6 +83,20 @@ module.exports = (url, auth, staging) => {
           reference
         }
       })
-      .then(response => response.data)
+      .then(response => {
+        const es = new EventSource(`${url}/streams/${response.data.job_id}`, {
+          headers: {
+            Accept: 'text/event-stream',
+            Cookie: cookie,
+            Host: URL.parse(url).host,
+            Referer: `${url}/projects/${projectId}/deploys/${response.data.id}`
+          }
+        })
+
+        return {
+          deploy: response.data,
+          eventSource: es
+        }
+      })
   }
 }

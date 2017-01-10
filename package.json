@@ -25,6 +25,7 @@
     "cheerio": "^0.22.0",
     "commander": "^2.9.0",
     "console.table": "^0.8.0",
+    "eventsource": "^0.2.1",
     "gitty": "^3.5.0",
     "moment": "^2.17.1",
     "ora": "^0.4.0",

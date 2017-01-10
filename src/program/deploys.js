@@ -3,6 +3,8 @@ const chalk = require('chalk')
 const config = require('../config')
 const h = require('./helpers')
 const ora = require('ora')
+const EventSource = require('eventsource')
+const cheerio = require('cheerio')
 
 const showDeploys = deploys => {
   console.table(deploys.map(deploy => ({
@@ -59,7 +61,7 @@ module.exports.deploy = api => (stage, reference, options) => {
   const spinners = Spinners([
     'Fetching project metadata...',
     'Authenticating...',
-    'Deploying (this can take some minutes)...'
+    'Starting deploy...'
   ])
 
   spinners.start()
@@ -73,18 +75,29 @@ module.exports.deploy = api => (stage, reference, options) => {
       return { projectId, token }
     }))
     .catch(() => spinners.fail())
-  .then(params => api
+  .then(params => {
+    spinners.succeedAndNext()
+    return api
     .deploy(
       params.projectId,
       stage || config.defaults.stage,
       params.token,
       reference || config.defaults.reference)
     .then(deploy => ({
-      deploy,
+      deploy: deploy.deploy,
+      eventSource: deploy.eventSource,
       projectId: params.projectId
-    })))
+    }))
+  })
   .then(params => {
-    spinners.succeedAndNext()
+    spinners.succeed(`Deploy started`)
+    params.eventSource.on('append', message => {
+      const payload = JSON.parse(message.data).msg
+      const $ = cheerio.load(payload)
+      console.log(chalk.white($('span').text().trim()))
+    })
+    params.eventSource.on('error', console.error)
+
     var id = setInterval(() => {
       api
       .getDeploys(params.projectId)
@@ -92,6 +105,7 @@ module.exports.deploy = api => (stage, reference, options) => {
         const deploy = deploys.find(d => d.id === params.deploy.id)
         if (h.isFinished(deploy.status)) {
           clearInterval(id)
+          params.eventSource.close()
           if (h.isFailed(deploy.status)) {
             spinners.fail(`Deploy failed: ${deploy.summary}`)
           } else {
