@@ -114,13 +114,13 @@ module.exports.deploy = api => (stage, reference, options) => {
         }
       })
       .catch(error => {
+        clearInterval(id)
+        params.eventSource.close()
         spinners.fail(error)
-        h.fail(error)
       })
     }, 1000)
   })
   .catch(err => {
-    spinners.fail()
-    h.fail(err)
+    spinners.fail(err)
   })
 }
