@@ -13,7 +13,17 @@ npm install -g samson-cli
 ```
 
 ## Configuration
+You should create a `samsonrc.json` file in each of your project directories. `samson` will look for it when you run the tool. The file should have this shape:
 
+```json
+{                                                                             
+  "url": "http://my-samson-url.com",                              
+  "project": "myProjectName",                                                        
+  "auth": "<authentication cookie>"                                            
+}  
+```
+
+The `auth` key expects the value of your Samson session cookie. We still don't have a better authentication system (perhaps based in a Samson user token) due to Samson API limitations.
 
 ## Usage
 ```
