@@ -1,5 +1,4 @@
 const helpers = require('./helpers')
-const config = require('../config')
 const moment = require('moment')
 
 const showBuilds = builds => {
@@ -11,7 +10,7 @@ const showBuilds = builds => {
   })))
 }
 
-module.exports = api => () => {
+module.exports = (api, config) => (options) => {
   api.getProjects()
   .then(helpers.getProjectId(config.project))
   .then(api.getBuilds)

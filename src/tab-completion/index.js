@@ -4,8 +4,6 @@ const tab = require('tabtab')({
   cache: false
 })
 
-const config = require('../config')
-const api = require('../api')(config.url, config.auth, !config.samson.production)
 const h = require('../program/helpers')
 
 tab.on(CMD, (data, done) => {
@@ -22,18 +20,25 @@ tab.on(CMD, (data, done) => {
   ])
 })
 
-tab.on('deploy', (data, done) => {
-  if (data.prev === 'deploy') {
-    api.getProjects()
-    .then(h.getProjectId(config.project))
-    .then(api.getStages)
-    .then(stages => done(null, stages.map(s => s.name)))
-    .catch(done)
-  } else {
-    api.getBranches()
-    .then(branches => done(null, branches))
-    .catch(done)
-  }
-})
+try {
+  const config = require('../config')
+  const api = require('../api')(config.url, config.auth, !config.samson.production)
+
+  tab.on('deploy', (data, done) => {
+    if (data.prev === 'deploy') {
+      api.getProjects()
+        .then(h.getProjectId(config.project))
+        .then(api.getStages)
+        .then(stages => done(null, stages.map(s => s.name)))
+        .catch(done)
+    } else {
+      api.getBranches()
+        .then(branches => done(null, branches))
+        .catch(done)
+    }
+  })
+} catch (err) {
+  console.log('Could not setup deploy autocomplete')
+}
 
 tab.start()

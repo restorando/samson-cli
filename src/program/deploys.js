@@ -1,6 +1,5 @@
 const moment = require('moment')
 const chalk = require('chalk')
-const config = require('../config')
 const h = require('./helpers')
 const ora = require('ora')
 const EventSource = require('eventsource')
@@ -14,7 +13,7 @@ const showDeploys = deploys => {
   })))
 }
 
-module.exports.show = api => () => {
+module.exports.show = (api, config) => () => {
   api.getProjects()
   .then(h.getProjectId(config.project))
   .then(api.getDeploys)
@@ -57,7 +56,7 @@ const Spinners = (tasks) => {
   }
 }
 
-module.exports.deploy = api => (stage, reference, options) => {
+module.exports.deploy = (api, config) => (stage, reference, options) => {
   const spinners = Spinners([
     'Fetching project metadata...',
     'Authenticating...',

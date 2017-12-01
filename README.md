@@ -16,11 +16,14 @@ npm install -g samson-cli
 You should create a `samsonrc.json` file in each of your project directories. `samson` will look for it when you run the tool. The file should have this shape:
 
 ```json
-{                                                                             
-  "url": "http://my-samson-url.com",                              
-  "project": "myProjectName",                                                        
-  "auth": "<authentication cookie>"                                            
-}  
+{
+  "url": "http://my-samson-url.com",
+  "project": "myProjectName",
+  "auth": "<authentication cookie>",
+  "samson": {
+    "production": true
+  }
+}
 ```
 
 The `auth` key expects the value of your Samson session cookie. We still don't have a better authentication system (perhaps based in a Samson user token) due to Samson API limitations.
@@ -70,6 +73,17 @@ Syntax:
 ```
 samson stages
 ```
+
+## Options
+
+### `-c | --config`
+You can specify a custom config, in json format
+
+Syntax:
+```
+samson <command> -c '{ "url": "http://my-samson-url.com", ...}'
+```
+Note: You may not need to have a `samsonrc.json` file in order to use the program if the config is specified this way, but some autocompletion features will be disabled
 
 ## To do
 - [ ] Authenticate using Samson token instead of the session cookie
