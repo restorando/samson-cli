@@ -4,8 +4,8 @@ const tab = require('tabtab')({
   cache: false
 })
 
-const config = require('../config')
-const api = require('../api')(config.url, config.auth, !config.samson.production)
+// const config = require('../config')
+// const api = require('../api')(config.url, config.auth, !config.samson.production)
 const h = require('../program/helpers')
 
 tab.on(CMD, (data, done) => {

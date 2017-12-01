@@ -1,12 +1,16 @@
 require('console.table')
 const program = require('commander')
 const meta = require('../../package.json')
-const config = require('../config')
-const api = require('../api')(config.url, config.auth, !config.samson.production)
-
 const deploys = require('./deploys')
 const stages = require('./stages')
 const builds = require('./builds')
+
+const config = () => program.config ? JSON.parse(program.config) : require('../config')
+const api = (config) => require('../api')(config.url, config.auth, !config.samson.production)
+const withApiAndConfig = (fn) => (...args) => {
+  const conf = config()
+  return fn(api(conf), conf)(...args)
+}
 
 program
   .version(meta.version)
@@ -19,19 +23,22 @@ program
 
 program
 .command('deploys')
-.action(deploys.show(api))
+.action(withApiAndConfig(deploys.show))
 
 program
 .command('builds')
-.action(builds(api))
+.action(withApiAndConfig(builds))
 
 program
 .command('stages')
-.action(stages(api))
+.action(withApiAndConfig(stages))
 
 program
 .command('deploy [stage] [reference]')
-.action(deploys.deploy(api))
+.action(withApiAndConfig(deploys.deploy))
 
-program.parse(process.argv)
+program
+.option('-c --config [config]', 'Use specific config, json format')  
+.parse(process.argv)
+
 module.exports = program

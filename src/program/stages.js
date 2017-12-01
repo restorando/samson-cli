@@ -1,4 +1,3 @@
-const config = require('../config')
 const h = require('./helpers')
 
 const showStages = stages => {
@@ -7,7 +6,7 @@ const showStages = stages => {
   })))
 }
 
-module.exports = api => () => {
+module.exports = (api, config) => (options) => {
   api.getProjects()
   .then(h.getProjectId(config.project))
   .then(api.getStages)
