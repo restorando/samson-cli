@@ -68,7 +68,7 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
   api.getProjects()
   .then(h.getProjectId(config.project))
   .then(projectId => api
-    .getAuthenticityToken(projectId, 'staging')
+    .getAuthenticityToken(projectId, stage)
     .then(token => {
       spinners.succeedAndNext()
       return { projectId, token }
