@@ -45,6 +45,7 @@ const Spinners = (tasks) => {
         current.text = error
       }
       current.fail()
+      h.fail(error || 'unknown error')
     },
     succeed: text => {
       if (text) {
