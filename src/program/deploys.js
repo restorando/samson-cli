@@ -45,7 +45,6 @@ const Spinners = (tasks) => {
         current.text = error
       }
       current.fail()
-      h.fail(error || 'unknown error')
     },
     succeed: text => {
       if (text) {
@@ -108,6 +107,7 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
           params.eventSource.close()
           if (h.isFailed(deploy.status)) {
             spinners.fail(`Deploy failed: ${deploy.summary}`)
+            h.fail(deploy.summary)
           } else {
             spinners.succeed(`Deploy succeeded: ${deploy.summary}`)
           }
@@ -117,10 +117,12 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
         clearInterval(id)
         params.eventSource.close()
         spinners.fail(error)
+        h.fail(error)
       })
     }, 1000)
   })
   .catch(err => {
     spinners.fail(err)
+    h.fail(err)
   })
 }
