@@ -73,9 +73,9 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
       spinners.succeedAndNext()
       return { projectId, token }
     }))
-    .catch(() => {
+    .catch(error => {
       spinners.fail()
-      h.fail(`Error: getAuthenticityToken(${projectId}, ${stage})`)
+      h.fail(error)
     })
   .then(params => {
     spinners.succeedAndNext()
