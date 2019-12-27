@@ -73,7 +73,10 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
       spinners.succeedAndNext()
       return { projectId, token }
     }))
-    .catch(() => spinners.fail())
+    .catch(error => {
+      spinners.fail()
+      h.fail(error)
+    })
   .then(params => {
     spinners.succeedAndNext()
     return api
@@ -107,6 +110,7 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
           params.eventSource.close()
           if (h.isFailed(deploy.status)) {
             spinners.fail(`Deploy failed: ${deploy.summary}`)
+            h.fail(deploy.summary)
           } else {
             spinners.succeed(`Deploy succeeded: ${deploy.summary}`)
           }
@@ -116,10 +120,12 @@ module.exports.deploy = (api, config) => (stage, reference, options) => {
         clearInterval(id)
         params.eventSource.close()
         spinners.fail(error)
+        h.fail(error)
       })
     }, 1000)
   })
   .catch(err => {
     spinners.fail(err)
+    h.fail(err)
   })
 }
